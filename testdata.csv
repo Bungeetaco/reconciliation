@@ -1,0 +1,11 @@
+DisplayName,UserPrincipalName,Department,Licenses
+"Call Queue 1","queue1@company.com","Call Center","440eaaa8-b3e0-484b-a8be-62870b9ba70a"
+"Support Queue","support@company.com","Support","440eaaa8-b3e0-484b-a8be-62870b9ba70a"
+"Sales Queue","sales@company.com","Sales","440eaaa8-b3e0-484b-a8be-62870b9ba70a"
+"John Smith","john.smith@company.com","Sales","11dee6af-eca8-419f-8061-6864517c1875,f30db892-07e9-47e9-837c-80727f46fd3d"
+"Jane Doe","jane.doe@company.com","Marketing","11dee6af-eca8-419f-8061-6864517c1875,06ebc4ee-1bb5-47dd-8120-11324bc54e06"
+"Bob Wilson","bob.wilson@company.com","IT","f30db892-07e9-47e9-837c-80727f46fd3d,1e1a282c-9c54-43a2-9310-98ef728faace"
+"Alice Brown","alice.brown@company.com","Support","440eaaa8-b3e0-484b-a8be-62870b9ba70a,11dee6af-eca8-419f-8061-6864517c1875"
+"Mike Johnson","mike.johnson@company.com","Engineering","06ebc4ee-1bb5-47dd-8120-11324bc54e06,1e1a282c-9c54-43a2-9310-98ef728faace"
+"Sarah Davis","sarah.davis@company.com","Marketing","11dee6af-eca8-419f-8061-6864517c1875,f30db892-07e9-47e9-837c-80727f46fd3d"
+"Tom Harris","tom.harris@company.com","Sales","1e1a282c-9c54-43a2-9310-98ef728faace,440eaaa8-b3e0-484b-a8be-62870b9ba70a"
