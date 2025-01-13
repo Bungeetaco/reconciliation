@@ -1,4 +1,8 @@
-# SJA Office 365 License Mapping
+
+<img src="https://github.com/user-attachments/assets/1320d707-b505-4c96-8c37-e8a4941a1775" width="48"> 
+
+## SJA Office 365 License Mapping
+
 
 A React-based application for managing and analyzing Microsoft 365 license assignments across St John Ambulance Canada.
 
