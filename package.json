@@ -5,13 +5,13 @@
   "type": "module",
   "homepage": "https://bungeetaco.github.io/reconciliation/",
 "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "build:github": "cross-env GITHUB_PAGES=true vite build",
-    "deploy": "npm run build:github && gh-pages -d dist"
-},
+  "dev": "vite",
+  "build": "tsc -b && vite build",  // Regular build for self-hosting
+  "build:github": "cross-env GITHUB_PAGES=true vite build",  // GitHub Pages build
+  "lint": "eslint .",
+  "preview": "vite preview",
+  "deploy": "npm run build:github && gh-pages -d dist"
+}
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",
     "class-variance-authority": "^0.7.1",

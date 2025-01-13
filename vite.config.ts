@@ -2,6 +2,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// Handle base URL for both GitHub Pages and self-hosting
+const base = process.env.GITHUB_PAGES === 'true' ? '/reconciliation/' : '/';
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -9,12 +12,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  base: process.env.GITHUB_PAGES ? '/reconciliation/' : '/',
+  base,  // Use the conditional base URL
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false, // Set to false for production
-    minify: 'terser', // Use terser for better minification
+    sourcemap: false,
+    minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: true,
@@ -36,13 +39,12 @@ export default defineConfig({
             '@/components/ui/card'
           ]
         },
-        // Ensure consistent file names
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
-    chunkSizeWarningLimit: 600 // Increase warning limit if needed
+    chunkSizeWarningLimit: 600
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'lodash', 'xlsx', 'papaparse', 'lucide-react']
