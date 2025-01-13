@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - master  # Changed from main to master
+      - master
 
 jobs:
   build-and-deploy:
@@ -19,7 +19,7 @@ jobs:
       - name: Install and Build
         run: |
           npm install
-          npm run build:github  # Changed from build to build:github
+          npm run build:github
           
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
