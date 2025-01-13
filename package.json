@@ -4,14 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "homepage": "https://bungeetaco.github.io/reconciliation/",
-  "scripts": {
+"scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:github": "GITHUB_PAGES=true vite build",
+    "build:github": "cross-env GITHUB_PAGES=true vite build",
     "deploy": "npm run build:github && gh-pages -d dist"
-  },
+},
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",
     "class-variance-authority": "^0.7.1",
@@ -36,6 +36,7 @@
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "cross-env": "^7.0.3",
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
