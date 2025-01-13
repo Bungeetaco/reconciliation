@@ -17,6 +17,7 @@ import { ChevronDown, ChevronUp, Upload } from 'lucide-react';
 import { calculateGrandTotals } from './lib/license-utils';
 import { compareValues, sortUserRows } from './helpers/sort-helpers';
 import { SortState } from './types/sorting';
+import { config } from './config';
 
 const LicenseMapping = () => {
   const { 
@@ -217,7 +218,11 @@ const LicenseMapping = () => {
           <div className="p-4">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
-                <img src="./sjalogo.png" alt="Company Logo" className="w-10 h-10" />
+                <img 
+                  src={`${config.basePath}sjalogo.png`} 
+                  alt="Company Logo" 
+                  className="w-10 h-10" 
+                />
                 <h1 className="text-2xl font-bold">SJA Office 365 License Mapping</h1>
               </div>
               
