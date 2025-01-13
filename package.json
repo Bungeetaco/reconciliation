@@ -33,7 +33,7 @@
     "@types/node": "^22.10.5",
     "@types/papaparse": "^5.3.15",
     "@types/react": "^19.0.6",
-    "@types/react-dom": "^19.0.0", // Updated to match @types/react version
+    "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",
