@@ -143,7 +143,7 @@ const LicenseMappingTable = ({
         <CardTitle className="text-center text-gray-900 dark:text-gray-100">License Mapping</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="overflow-auto max-h-[600px] scrollbar scrollbar-w-4 hover:scrollbar-w-5 scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500 dark:scrollbar-thumb-gray-500 dark:hover:scrollbar-thumb-gray-400 scrollbar-track-transparent hover:scrollbar-track-gray-200 dark:hover:scrollbar-track-gray-800 transition-all duration-100">
+        <div className="overflow-auto max-h-[calc(100vh-400px)] scrollbar scrollbar-w-4 hover:scrollbar-w-5 scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500 dark:scrollbar-thumb-gray-500 dark:hover:scrollbar-thumb-gray-400 scrollbar-track-transparent hover:scrollbar-track-gray-200 dark:hover:scrollbar-track-gray-800 transition-all duration-100">
           <table className="w-full border-collapse min-w-[800px] border border-gray-200 dark:border-gray-700">
             <thead className="sticky top-0 z-10">
               {tableHeaders}

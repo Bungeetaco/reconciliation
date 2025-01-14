@@ -2,6 +2,7 @@
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { SKU_PRICING, SKU_MAPPING } from './license-types';
+import memoize from 'lodash.memoize';
 
 interface License {
   guid: string;
@@ -37,6 +38,8 @@ export const calculateGrandTotals = (data: GroupedData): { users: number, monthl
 
   return { users, monthly, annual };
 };
+
+const memoizedCalculateGrandTotals = memoize(calculateGrandTotals);
 
 export const parseLicenses = (licenseString: string | undefined): License[] => {
   if (!licenseString) return [];
@@ -222,50 +225,8 @@ export function generateExcel(data: GroupedData, branding: string): XLSX.WorkBoo
   return workbook;
 }
 
-export const generateHTML = (groupedData: GroupedData, branding: string, isPdf: boolean = false): string => {
-  const styles = generateStyles();
-  let html = generateHTMLHeader(styles);
-
-  // Calculate table width for print orientation
-  const licenseTypes = new Set<string>();
-  Object.values(groupedData).forEach((value: User[]) => {
-    value.forEach((user: User) => {
-      user.licenses.forEach((license: License) => {
-        if (![
-          'AAD P1', 'Communications Credits', 'Microsoft 365 Phone System', 
-          'Microsoft Flow Free', 'Microsoft Teams Shared Devices', 
-          'Microsoft Teams Rooms Standard', 'Power BI (free)', 
-          'Power Pages vTrial for Makers', 'Power Virtual Agents Viral Trial'
-        ].includes(license.productName)) {
-          licenseTypes.add(license.productName);
-        }
-      });
-    });
-  });
-  const tableWidth = 650 + (licenseTypes.size * 150); // Base width + license columns
-
-  // Replace placeholder in styles
-  html = html.replace('{{ tableWidth }}', tableWidth.toString());
-
-  // Add license summary card
-  html += generateLicenseSummaryTable(groupedData);
-
-  // Add user mapping table
-  html += generateUserMappingTable(groupedData, Array.from(licenseTypes), isPdf);
-
-  // Add totals summary
-  html += generateTotalsSummary(groupedData);
-
-  // Add branding
-  html += `<div class="branding">${branding}</div>`;
-
-  html += generateHTMLFooter();
-
-  return html;
-};
-
 // Helper functions for HTML generation
-function generateLicenseSummaryTable(data: GroupedData): string {
+const generateLicenseSummaryTable = (data: GroupedData): string => {
   const licenseTypes = new Set<string>();
   const licenseCounts: Record<string, { users: number, monthlyTotal: number, annualTotal: number }> = {};
 
@@ -313,10 +274,12 @@ function generateLicenseSummaryTable(data: GroupedData): string {
       </div>
     </div>
   `;
-}
+};
 
-function generateTotalsSummary(data: GroupedData): string {
-  const totals = calculateGrandTotals(data);
+const memoizedGenerateLicenseSummaryTable = memoize(generateLicenseSummaryTable);
+
+const generateTotalsSummary = (data: GroupedData): string => {
+  const totals = memoizedCalculateGrandTotals(data);
   
   return `
     <div class="card" style="page-break-inside: avoid;">
@@ -341,9 +304,11 @@ function generateTotalsSummary(data: GroupedData): string {
       </div>
     </div>
   `;
-}
+};
 
-function generateUserMappingTable(data: GroupedData, licenseTypes: string[], isPdf: boolean): string {
+const memoizedGenerateTotalsSummary = memoize(generateTotalsSummary);
+
+const generateUserMappingTable = (data: GroupedData, licenseTypes: string[], isPdf: boolean): string => {
   return `
     <div class="card" style="page-break-after: auto;">
       <div class="card-header">
@@ -383,7 +348,51 @@ function generateUserMappingTable(data: GroupedData, licenseTypes: string[], isP
       </div>
     </div>
   `;
-}
+};
+
+const memoizedGenerateUserMappingTable = memoize(generateUserMappingTable);
+
+export const generateHTML = (groupedData: GroupedData, branding: string, isPdf: boolean = false): string => {
+  const styles = generateStyles();
+  let html = generateHTMLHeader(styles);
+
+  // Calculate table width for print orientation
+  const licenseTypes = new Set<string>();
+  Object.values(groupedData).forEach((value: User[]) => {
+    value.forEach((user: User) => {
+      user.licenses.forEach((license: License) => {
+        if (![
+          'AAD P1', 'Communications Credits', 'Microsoft 365 Phone System', 
+          'Microsoft Flow Free', 'Microsoft Teams Shared Devices', 
+          'Microsoft Teams Rooms Standard', 'Power BI (free)', 
+          'Power Pages vTrial for Makers', 'Power Virtual Agents Viral Trial'
+        ].includes(license.productName)) {
+          licenseTypes.add(license.productName);
+        }
+      });
+    });
+  });
+  const tableWidth = 650 + (licenseTypes.size * 150); // Base width + license columns
+
+  // Replace placeholder in styles
+  html = html.replace('{{ tableWidth }}', tableWidth.toString());
+
+  // Add license summary card
+  html += memoizedGenerateLicenseSummaryTable(groupedData);
+
+  // Add user mapping table
+  html += memoizedGenerateUserMappingTable(groupedData, Array.from(licenseTypes), isPdf);
+
+  // Add totals summary
+  html += memoizedGenerateTotalsSummary(groupedData);
+
+  // Add branding
+  html += `<div class="branding">${branding}</div>`;
+
+  html += generateHTMLFooter();
+
+  return html;
+};
 
 function generateSummaryData(data: GroupedData): (string | number)[][] {
   return [
@@ -625,7 +634,7 @@ function generateHTMLHeader(styles: string): string {
     <body>
       <div class="container">
         <header class="header">
-          <img src="https://www.clipartmax.com/png/full/77-773552_ambulance-clipart-images.png" alt="SJA Logo" class="logo" />
+          <img src="https://sjalicenseparse.blob.core.windows.net/assets/sjalogo.png" alt="SJA Logo" class="logo" />
           <h1>SJA Office 365 License Report</h1>
         </header>
         <div class="content">
