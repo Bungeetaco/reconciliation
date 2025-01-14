@@ -17,6 +17,7 @@
     "@types/lodash.memoize": "^4.1.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "lodash.memoize": "^4.1.2",
     "lucide-react": "^0.471.1",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
+    "@types/localforage": "^0.0.33",
     "@types/lodash": "^4.17.14",
     "@types/node": "^22.10.5",
     "@types/papaparse": "^5.3.15",

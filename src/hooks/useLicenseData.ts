@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { GroupedData, ParsedUser } from '@/types';
 import Papa from 'papaparse';
 import { mapLicensesData } from '@/helpers/filter-helpers';
 import _ from 'lodash';
-import { ErrorCodes, LicenseError } from '@/types/errors';
+import { LicenseError } from '@/types/errors';
+import localforage from 'localforage';
 
 export interface UseLicenseDataReturn {
   groupedData: GroupedData;
@@ -15,11 +16,24 @@ export interface UseLicenseDataReturn {
   handleFileDrop: (event: React.DragEvent<HTMLDivElement>) => Promise<void>;
 }
 
+const CACHE_KEY = 'licenseDataCache';
+
 export function useLicenseData(): UseLicenseDataReturn {
   const [groupedData, setGroupedData] = useState<GroupedData>({});
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState('');
   const [error, setError] = useState<LicenseError | null>(null);
+
+  useEffect(() => {
+    const loadCachedData = async () => {
+      const cachedData = await localforage.getItem<{ groupedData: GroupedData; fileName: string }>(CACHE_KEY);
+      if (cachedData) {
+        setGroupedData(cachedData.groupedData);
+        setFileName(cachedData.fileName);
+      }
+    };
+    loadCachedData();
+  }, []);
 
   const processFile = async (file: File) => {
     if (!file) {
@@ -27,38 +41,55 @@ export function useLicenseData(): UseLicenseDataReturn {
       setGroupedData({});
       return;
     }
-    
-    setLoading(true);
-    try {
-      const text = await file.text();
-      const result = Papa.parse<ParsedUser>(text, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: header => header.trim(),
-        transform: value => value.trim()
-      });
-      
-      if (result.errors.length > 0) {
-        throw new Error('Error parsing CSV: ' + result.errors[0].message);
-      }
 
-      const licenses = result.data;
-      const mappedData = mapLicensesData(licenses);
-      const grouped = _.groupBy(mappedData, 'department');
-      const sortedGrouped = _.mapValues(grouped, users => 
-        _.sortBy(users, ['displayName'])
-      );
-      
-      setGroupedData(sortedGrouped);
-      setFileName(file.name);
-    } catch (error) {
+    setError(null); // Reset error state before processing
+
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (file.type !== 'text/csv' && fileExtension !== 'csv') {
       const licenseError = new LicenseError(
-        'Error loading file',
-        ErrorCodes.FILE_PARSE_ERROR,
-        error
+        'Invalid file type',
+        'INVALID_FILE_TYPE',
+        new Error('Only CSV files are allowed')
       );
       setError(licenseError);
       console.error(licenseError);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const text = await file.text();
+      Papa.parse<ParsedUser>(text, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: header => header.trim(),
+        transform: value => value.trim(),
+        complete: (results) => {
+          if (results.errors.length > 0) {
+            throw new Error('Error parsing CSV: ' + results.errors.map(e => e.message).join(', '));
+          }
+
+          const licenses = results.data;
+          const mappedData = mapLicensesData(licenses);
+          const grouped = _.groupBy(mappedData, 'department');
+          const sortedGrouped = _.mapValues(grouped, users => 
+            _.sortBy(users, ['displayName'])
+          );
+
+          setGroupedData(sortedGrouped);
+          setFileName(file.name);
+
+          localforage.setItem(CACHE_KEY, { groupedData: sortedGrouped, fileName: file.name });
+        }
+      });
+    } catch (error) {
+      const licenseError = new LicenseError(
+        'Error loading file',
+        'FILE_PARSE_ERROR',
+        error
+      );
+      setError(licenseError);
+      console.error('Error details:', error);
     } finally {
       setLoading(false);
     }
