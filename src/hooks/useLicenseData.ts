@@ -69,7 +69,7 @@ export function useLicenseData(): UseLicenseDataReturn {
             throw new Error('Error parsing CSV: ' + results.errors.map(e => e.message).join(', '));
           }
 
-          const licenses = results.data;
+          const licenses = results.data.filter(user => !user.UserPrincipalName.includes('#EXT#')); // Corrected property name
           const mappedData = mapLicensesData(licenses);
           const grouped = _.groupBy(mappedData, 'department');
           const sortedGrouped = _.mapValues(grouped, users => 

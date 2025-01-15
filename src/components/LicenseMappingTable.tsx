@@ -71,16 +71,16 @@ const Row = memo(({ index, style, data }: RowProps) => {
       className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
       tabIndex={0}
     >
-      <div role="cell" className="flex-1 min-w-[200px] p-2">{user.displayName}</div>
-      <div role="cell" className="flex-1 min-w-[200px] p-2">{user.userPrincipalName}</div>
-      <div role="cell" className="flex-1 min-w-[250px] p-2">{user.department}</div> {/* Increased min-width */}
-      <div role="cell" className="w-[120px] text-right p-2">{formatter.format(user.totalMonthlyCost ?? 0)}</div>
-      <div role="cell" className="w-[120px] text-right p-2">{formatter.format(user.totalAnnualCost ?? 0)}</div>
+      <div role="cell" className="flex-1 min-w-[200px] p-2 border-r border-gray-200 dark:border-gray-700">{user.displayName}</div>
+      <div role="cell" className="flex-1 min-w-[250px] p-2 border-r border-gray-200 dark:border-gray-700">{user.userPrincipalName}</div> {/* Increased min-width */}
+      <div role="cell" className="flex-1 min-w-[250px] p-2 border-r border-gray-200 dark:border-gray-700">{user.department}</div> {/* Increased min-width */}
+      <div role="cell" className="w-[120px] text-right p-2 border-r border-gray-200 dark:border-gray-700">{formatter.format(user.totalMonthlyCost ?? 0)}</div>
+      <div role="cell" className="w-[120px] text-right p-2 border-r border-gray-200 dark:border-gray-700">{formatter.format(user.totalAnnualCost ?? 0)}</div>
       {licenseColumns.map((license) => (
         <div 
           key={license.key} 
           role="cell"
-          className="w-[80px] text-center p-2"
+          className="w-[80px] text-center p-2 border-r border-gray-200 dark:border-gray-700"
         >
           {user.licenses.some(l => l.productName === license.name) ? '✓' : ''}
         </div>
@@ -110,7 +110,7 @@ const TableHeader = memo(({ licenseColumns, sortState, onSort }: TableHeaderProp
       <div 
         onClick={() => handleSort('displayName')}
         className={cn(
-          "flex-1 min-w-[200px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700",
+          "flex-1 min-w-[200px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-r border-gray-200 dark:border-gray-700",
           sortState.column === 'displayName' && 'bg-blue-50 dark:bg-blue-900'
         )}
       >
@@ -120,7 +120,7 @@ const TableHeader = memo(({ licenseColumns, sortState, onSort }: TableHeaderProp
       <div 
         onClick={() => handleSort('userPrincipalName')}
         className={cn(
-          "flex-1 min-w-[200px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700",
+          "flex-1 min-w-[250px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-r border-gray-200 dark:border-gray-700", // Increased min-width
           sortState.column === 'userPrincipalName' && 'bg-blue-50 dark:bg-blue-900'
         )}
       >
@@ -130,7 +130,7 @@ const TableHeader = memo(({ licenseColumns, sortState, onSort }: TableHeaderProp
       <div 
         onClick={() => handleSort('department')}
         className={cn(
-          "flex-1 min-w-[250px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700", // Increased min-width
+          "flex-1 min-w-[250px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-r border-gray-200 dark:border-gray-700", // Increased min-width
           sortState.column === 'department' && 'bg-blue-50 dark:bg-blue-900'
         )}
       >
@@ -140,7 +140,7 @@ const TableHeader = memo(({ licenseColumns, sortState, onSort }: TableHeaderProp
       <div 
         onClick={() => handleSort('totalMonthlyCost')}
         className={cn(
-          "w-[120px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700",
+          "w-[120px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-r border-gray-200 dark:border-gray-700",
           sortState.column === 'totalMonthlyCost' && 'bg-blue-50 dark:bg-blue-900'
         )}
       >
@@ -150,7 +150,7 @@ const TableHeader = memo(({ licenseColumns, sortState, onSort }: TableHeaderProp
       <div 
         onClick={() => handleSort('totalAnnualCost')}
         className={cn(
-          "w-[120px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700",
+          "w-[120px] p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-r border-gray-200 dark:border-gray-700",
           sortState.column === 'totalAnnualCost' && 'bg-blue-50 dark:bg-blue-900'
         )}
       >
@@ -160,7 +160,7 @@ const TableHeader = memo(({ licenseColumns, sortState, onSort }: TableHeaderProp
       {licenseColumns.map((license: any) => (
         <div 
           key={license.key}
-          className="w-[80px] p-2 text-center"
+          className="w-[80px] p-2 text-center border-r border-gray-200 dark:border-gray-700"
           title={`${license.name}`}
         >
           {license.name}

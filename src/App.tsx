@@ -67,6 +67,9 @@ const LicenseMapping = () => {
     const filtered = { ...groupedData };
     filterByDepartments(filtered, selectedDepartments);
     filterBySearchTermAndLicenseTypes(filtered, searchTerm, selectedLicenseTypes, showUnknownLicenses, hideZeroCostAccounts);
+    Object.keys(filtered).forEach(department => {
+      filtered[department] = filtered[department].filter(user => !user.userPrincipalName.includes('#EXT#')); // Corrected property name
+    });
     return filtered;
   }, [groupedData, searchTerm, selectedDepartments, selectedLicenseTypes, showUnknownLicenses, hideZeroCostAccounts]);
 
