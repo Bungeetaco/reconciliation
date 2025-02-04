@@ -2,36 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.2.0] - 2025-02-05
 
 ### Added
-- Initial setup of the project with Vite, React, and TypeScript.
-- Configured ESLint with TypeScript and React plugins.
-- Added Tailwind CSS for styling.
-- Implemented dark/light theme support using `next-themes`.
-- Created `LicenseMapping` component for displaying license data.
-- Added `FileUpload` component for uploading CSV files.
-- Implemented `SearchBar` component for filtering license data.
-- Created `ActionButtons` component for exporting data in various formats (PDF, CSV, Excel, HTML).
-- Added `LicenseMappingTable` component for displaying license data in a table format.
-- Implemented `useLicenseData` hook for managing license data state.
-- Added `useSorting` hook for handling table sorting.
-- Created utility functions for filtering and sorting data.
-- Implemented export helpers for generating PDF, CSV, Excel, and HTML files.
-- Added error handling with `ErrorBoundary` component.
-- Configured Tailwind CSS with custom themes and plugins.
-- Added initial documentation in `README.md`.
+- Microsoft SSO integration using MSAL for direct data fetching
+- Microsoft Graph API integration for fetching user and license data
+- Dark mode support with system theme detection
+- Export functionality for PDF, CSV, Excel, and HTML formats
+- Advanced filtering options:
+  - Department filtering
+  - License type filtering
+  - Search functionality
+  - Option to hide zero-cost accounts
+  - Option to show/hide unknown licenses
+- Sorting capabilities for all data columns
+- Cost calculation for monthly and annual license expenses
+- Error boundary implementation for graceful error handling
+- Loading spinner for asynchronous operations
+- Responsive UI with Tailwind CSS
+- Type-safe implementation with TypeScript
 
 ### Changed
-- N/A
+- Updated React to version 18.2.0 for improved performance
+- Migrated to TypeScript for better type safety
+- Implemented modular component architecture
+- Enhanced data management with custom hooks
+- Improved error handling with custom error types
 
 ### Fixed
-- N/A
+- Type definitions for user cost properties
+- Microsoft Graph API authentication flow
+- Data transformation for Microsoft license data
+- Theme persistence across sessions
+- Performance optimizations with useMemo and useCallback
 
-### Removed
-- N/A
-
-## [0.1.0] - 2024-10-01
+## [0.1.0] - 2024-02-04
 
 ### Added
-- Initial release of the SJA Office 365 License Mapping application.
+- Initial release with basic functionality
+- File upload support for CSV data
+- Basic data display and filtering
+- Simple cost calculations
+- Basic UI components
