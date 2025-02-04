@@ -32,10 +32,10 @@ interface TableHeaderProps {
   onSort: (sort: SortState) => void;
 }
 
-const ROW_HEIGHT = 60; // Increased for better readability and to prevent overlap
+const ROW_HEIGHT = 60;
 const HEADER_HEIGHT = 45;
 const MIN_TABLE_HEIGHT = 400;
-const OVERSCAN_COUNT = 10; // Increased for smoother scrolling
+const OVERSCAN_COUNT = 10;
 const SCROLL_DEBOUNCE = 100;
 
 const formatter = new Intl.NumberFormat('en-CA', {
@@ -182,18 +182,24 @@ const LicenseMappingTable = ({
   const listRef = useRef<List>(null);
   const scrollPositionRef = useRef(0);
 
+  // Memoized callbacks for virtualization
+  const getItemSize = useCallback(() => ROW_HEIGHT, []);
+  const getItemKey = useCallback((index: number) => userRows[index].userPrincipalName, [userRows]);
+
   // Dynamic height calculation
   useEffect(() => {
     const updateHeight = debounce(() => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const footerHeight = 60; // Approximate footer height
+      const footerHeight = 60;
       const availableHeight = window.innerHeight - rect.top - footerHeight;
       const newHeight = Math.max(MIN_TABLE_HEIGHT, availableHeight);
       
-      // Only update if height changed significantly
       if (Math.abs(newHeight - tableHeight) > 10) {
         setTableHeight(newHeight);
+        if (listRef.current) {
+          listRef.current.resetAfterIndex(0);
+        }
       }
     }, SCROLL_DEBOUNCE);
 
@@ -296,9 +302,9 @@ const LicenseMappingTable = ({
                         height={height - HEADER_HEIGHT}
                         width={totalWidth}
                         itemCount={userRows.length}
-                        itemSize={() => ROW_HEIGHT} // Changed to function for VariableSizeList
+                        itemSize={getItemSize}
                         itemData={itemData}
-                        itemKey={(index) => userRows[index].userPrincipalName}
+                        itemKey={getItemKey}
                         overscanCount={OVERSCAN_COUNT}
                         onScroll={handleScroll}
                         className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent"

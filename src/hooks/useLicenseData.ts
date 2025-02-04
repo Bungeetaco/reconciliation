@@ -14,6 +14,7 @@ export interface UseLicenseDataReturn {
   setError: (error: LicenseError | null) => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleFileDrop: (event: React.DragEvent<HTMLDivElement>) => Promise<void>;
+  setGroupedData: (data: GroupedData) => void;
 }
 
 const CACHE_KEY = 'licenseDataCache';
@@ -42,17 +43,17 @@ export function useLicenseData(): UseLicenseDataReturn {
       return;
     }
 
-    setError(null); // Reset error state before processing
+    setError(null);
 
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     if (file.type !== 'text/csv' && fileExtension !== 'csv') {
       const licenseError = new LicenseError(
-        'Invalid file type',
+        'Invalid file type - Only CSV files are supported',
         'INVALID_FILE_TYPE',
-        new Error('Only CSV files are allowed')
+        { fileType: file.type, extension: fileExtension }
       );
       setError(licenseError);
-      console.error(licenseError);
+      console.error('File type error:', licenseError);
       return;
     }
 
@@ -66,10 +67,33 @@ export function useLicenseData(): UseLicenseDataReturn {
         transform: value => value.trim(),
         complete: (results) => {
           if (results.errors.length > 0) {
-            throw new Error('Error parsing CSV: ' + results.errors.map(e => e.message).join(', '));
+            throw new LicenseError(
+              'CSV parsing failed',
+              'CSV_PARSE_ERROR',
+              { errors: results.errors }
+            );
           }
 
-          const licenses = results.data.filter(user => !user.UserPrincipalName.includes('#EXT#')); // Corrected property name
+          if (!results.data.length) {
+            throw new LicenseError(
+              'CSV file is empty',
+              'EMPTY_FILE_ERROR',
+              { fileName: file.name }
+            );
+          }
+
+          const licenses = results.data.filter(user => 
+            user.UserPrincipalName && !user.UserPrincipalName.includes('#EXT#')
+          );
+
+          if (!licenses.length) {
+            throw new LicenseError(
+              'No valid license data found',
+              'NO_DATA_ERROR',
+              { fileName: file.name }
+            );
+          }
+
           const mappedData = mapLicensesData(licenses);
           const grouped = _.groupBy(mappedData, 'department');
           const sortedGrouped = _.mapValues(grouped, users => 
@@ -79,17 +103,22 @@ export function useLicenseData(): UseLicenseDataReturn {
           setGroupedData(sortedGrouped);
           setFileName(file.name);
 
-          localforage.setItem(CACHE_KEY, { groupedData: sortedGrouped, fileName: file.name });
+          localforage.setItem(CACHE_KEY, { 
+            groupedData: sortedGrouped, 
+            fileName: file.name 
+          }).catch(error => {
+            console.warn('Failed to cache license data:', error);
+          });
         }
       });
     } catch (error) {
-      const licenseError = new LicenseError(
+      const licenseError = error instanceof LicenseError ? error : new LicenseError(
         'Error loading file',
         'FILE_PARSE_ERROR',
         error
       );
       setError(licenseError);
-      console.error('Error details:', error);
+      console.error('Error processing file:', licenseError);
     } finally {
       setLoading(false);
     }
@@ -113,6 +142,7 @@ export function useLicenseData(): UseLicenseDataReturn {
     error,
     setError,
     handleFileUpload,
-    handleFileDrop
+    handleFileDrop,
+    setGroupedData
   };
 }

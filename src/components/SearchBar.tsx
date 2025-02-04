@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { Select } from '@/components/ui/select';
 
 interface SearchBarProps {
   searchTerm: string;
@@ -52,31 +53,29 @@ export function SearchBar({
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
-        {/* Department Select */}
-        <select
-          multiple
-          value={selectedDepartments}
-          onChange={(e) => onDepartmentChange(Array.from(e.target.selectedOptions, option => option.value))}
-          className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg min-w-[200px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          <option value="" disabled>Select Departments</option>
-          {departments.map(dept => (
-            <option key={dept} value={dept}>{dept}</option>
-          ))}
-        </select>
+        {/* Department Dropdown */}
+        <Select
+          value={selectedDepartments[0] || ''}
+          onValueChange={(value: string) => onDepartmentChange([value])}
+          placeholder="Select Department"
+          className="min-w-[200px]"
+          options={departments.map(dept => ({
+            label: dept,
+            value: dept
+          }))}
+        />
 
-        {/* License Types Select */}
-        <select
-          multiple
-          value={selectedLicenseTypes}
-          onChange={(e) => onLicenseTypesChange(Array.from(e.target.selectedOptions, option => option.value))}
-          className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg min-w-[200px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          <option value="" disabled>Select License Types</option>
-          {licenseTypes.map(type => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
+        {/* License Types Dropdown */}
+        <Select
+          value={selectedLicenseTypes[0] || ''}
+          onValueChange={(value: string) => onLicenseTypesChange([value])}
+          placeholder="Select License Type"
+          className="min-w-[200px]"
+          options={licenseTypes.map(type => ({
+            label: type,
+            value: type
+          }))}
+        />
 
         {/* Checkboxes */}
         <div className="flex flex-col gap-2">

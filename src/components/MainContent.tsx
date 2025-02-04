@@ -5,23 +5,31 @@ import { PriceSummaryCard } from './PriceSummaryCard';
 import { GrandTotalsCard } from './GrandTotalsCard';
 import LicenseMappingTable from './LicenseMappingTable';
 import { SortState } from '../types/sorting';
+import { User } from '../types';
+
+interface LicenseSummary {
+  type: string;
+  totalUsers: number;
+  totalMonthlyCost: number;
+  totalAnnualCost: number;
+}
+
+interface LicenseColumn {
+  key: string;
+  name: string;
+}
 
 interface MainContentProps {
   fileName: string;
   onFileDrop: (event: React.DragEvent<HTMLDivElement>) => void;
-  licenseSummary: Array<{
-    type: string;
-    totalUsers: number;
-    totalMonthlyCost: number;
-    totalAnnualCost: number;
-  }>;
+  licenseSummary: LicenseSummary[];
   summarySort: {
     column: string;
     direction: 'asc' | 'desc' | null;
   };
   onSummarySort: (column: string) => void;
-  userRows: any[];
-  licenseColumns: any[];
+  userRows: User[];
+  licenseColumns: LicenseColumn[];
   sortState: SortState;
   onSort: (column: string) => void;
   grandTotals: {
@@ -63,24 +71,22 @@ export const MainContent = memo(function MainContent({
       <div className="h-full p-4">
         {fileName ? (
           <div className="flex flex-col gap-4">
+            <GrandTotalsCard 
+              grandTotals={grandTotals}
+              activeUsers={activeUsers}
+              formatCurrency={formatCurrency}
+            />
             <PriceSummaryCard 
               licenseSummary={licenseSummary}
               summarySort={summarySort}
               onSummarySort={onSummarySort}
               formatCurrency={formatCurrency}
             />
-
             <LicenseMappingTable 
               userRows={userRows}
               licenseColumns={licenseColumns}
               sortState={sortState}
               onSort={(newState: SortState) => onSort(newState.column)}
-            />
-
-            <GrandTotalsCard 
-              grandTotals={grandTotals}
-              activeUsers={activeUsers}
-              formatCurrency={formatCurrency}
             />
           </div>
         ) : (

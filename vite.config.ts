@@ -32,7 +32,9 @@ export default defineConfig({
             'react-dom',
             'lodash',
             'xlsx',
-            'papaparse'
+            'papaparse',
+            'dompurify',
+            'exceljs'
           ],
           'ui': [
             'lucide-react',
@@ -47,6 +49,15 @@ export default defineConfig({
     chunkSizeWarningLimit: 600
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'lodash', 'xlsx', 'papaparse', 'lucide-react']
+    include: [
+      'react', 
+      'react-dom', 
+      'lodash', 
+      'xlsx', 
+      'papaparse', 
+      'lucide-react',
+      'dompurify',
+      'exceljs'
+    ]
   }
 });

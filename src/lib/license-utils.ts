@@ -1,6 +1,5 @@
 // src/lib/license-utils.ts
 import Papa from 'papaparse';
-import * as XLSX from 'xlsx';
 import { SKU_PRICING, SKU_MAPPING } from './license-types';
 import memoize from 'lodash.memoize';
 
@@ -110,7 +109,7 @@ export const processDepartment = (department: string | undefined): string => {
   return department;
 };
   
-export const generateCSV = (groupedData: GroupedData, branding: string): string => {
+export function generateCSV(data: GroupedData, branding: string): string {
   const rows: string[][] = [];
 
   // Add headers
@@ -125,7 +124,7 @@ export const generateCSV = (groupedData: GroupedData, branding: string): string 
   ]);
 
   // Add data rows
-  Object.entries(groupedData).forEach(([department, users]) => {
+  Object.entries(data).forEach(([department, users]) => {
     users.forEach((user: User) => {
       const monthlyTotal = user.licenses.reduce((sum: number, license: License) => 
         sum + (SKU_PRICING[license.guid]?.monthlyPrice || 0), 0);
@@ -145,7 +144,7 @@ export const generateCSV = (groupedData: GroupedData, branding: string): string 
   });
 
   // Add grand totals
-  const grandTotals = calculateGrandTotals(groupedData);
+  const grandTotals = calculateGrandTotals(data);
   rows.push([]); // Empty row
   rows.push([
     'GRAND TOTALS',
@@ -162,67 +161,6 @@ export const generateCSV = (groupedData: GroupedData, branding: string): string 
   rows.push([branding]);
 
   return Papa.unparse(rows);
-};
-
-export function generateExcel(data: GroupedData, branding: string): XLSX.WorkBook {
-  const workbook = XLSX.utils.book_new();
-  
-  // Create summary sheet
-  const summaryData = generateSummaryData(data);
-  summaryData.push([]);
-  summaryData.push([branding]);
-  const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
-
-  // Create department sheets
-  Object.entries(data).forEach(([dept, users]) => {
-    const licenseTypes = new Set<string>();
-    users.forEach(user => {
-      user.licenses.forEach((license: License) => {
-        if (![
-          'AAD P1', 'Communications Credits', 'Microsoft 365 Phone System', 
-          'Microsoft Flow Free', 'Microsoft Teams Shared Devices', 
-          'Microsoft Teams Rooms Standard', 'Power BI (free)', 
-          'Power Pages vTrial for Makers', 'Power Virtual Agents Viral Trial'
-        ].includes(license.productName)) {
-          licenseTypes.add(license.productName);
-        }
-      });
-    });
-    
-    const headers = [
-      'Display Name',
-      'Email',
-      'Monthly Cost',
-      'Annual Cost',
-      ...Array.from(licenseTypes)
-    ];
-
-    const deptData = [
-      headers,
-      ...users.map(user => {
-        const row = [
-          user.displayName,
-          user.userPrincipalName,
-          user.licenses.reduce((sum: number, license: License) => 
-            sum + (SKU_PRICING[license.guid]?.monthlyPrice || 0), 0).toFixed(2),
-          user.licenses.reduce((sum: number, license: License) => 
-            sum + (SKU_PRICING[license.guid]?.annualPrice || 0), 0).toFixed(2),
-          ...Array.from(licenseTypes).map(type => 
-            user.licenses.some((l: License) => l.productName === type) ? 'X' : '')
-        ];
-        return row;
-      })
-    ];
-
-    deptData.push([]);
-    deptData.push([branding]);
-
-    const sheet = XLSX.utils.aoa_to_sheet(deptData);
-    XLSX.utils.book_append_sheet(workbook, sheet, dept.slice(0, 31)); // Excel sheet names limited to 31 chars
-  });
-
-  return workbook;
 }
 
 // Helper functions for HTML generation
@@ -394,26 +332,6 @@ export const generateHTML = (groupedData: GroupedData, branding: string, isPdf: 
   return html;
 };
 
-function generateSummaryData(data: GroupedData): (string | number)[][] {
-  return [
-    ['Department', 'Total Users', 'Monthly Cost', 'Annual Cost'],
-    ...Object.entries(data).map(([dept, users]) => {
-      const deptTotal = users.reduce((acc, user) => ({
-        monthly: acc.monthly + user.licenses.reduce((sum: number, license: License) => 
-          sum + (SKU_PRICING[license.guid]?.monthlyPrice || 0), 0),
-        annual: acc.annual + user.licenses.reduce((sum: number, license: License) => 
-          sum + (SKU_PRICING[license.guid]?.annualPrice || 0), 0),
-      }), { monthly: 0, annual: 0 });
-      
-      return [
-        dept,
-        users.length,
-        deptTotal.monthly.toFixed(2),
-        deptTotal.annual.toFixed(2)
-      ];
-    })
-  ];
-}
 
 function generateStyles(): string {
   return `

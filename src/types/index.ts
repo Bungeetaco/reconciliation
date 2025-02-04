@@ -1,6 +1,8 @@
 export interface License {
   guid: string;
   productName: string;
+  monthlyPrice?: number;
+  annualPrice?: number;
 }
 
 export interface User {
@@ -9,11 +11,12 @@ export interface User {
   department: string;
   originalDepartment: string;
   licenses: License[];
+  totalMonthlyCost: number;
+  totalAnnualCost: number;
+  costPerUser?: number;
 }
 
-export interface GroupedData {
-  [department: string]: User[];
-}
+export type GroupedData = Record<string, User[]>;
 
 export interface GrandTotals {
   monthly: number;

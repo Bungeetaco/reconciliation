@@ -2,7 +2,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { ThemeProvider } from "@/providers/theme-provider";
 import { useLicenseData } from "./hooks/useLicenseData";
-import { User, License } from './types';
+import { User, License, GroupedData } from './types';
 import { exportToPDF, exportToCSV, exportToExcel, exportToHTML } from './helpers/export-helpers';
 import { filterByDepartments, filterBySearchTermAndLicenseTypes } from './helpers/filter-helpers';
 import { useSorting } from './hooks/useSorting';
@@ -14,6 +14,16 @@ import { MainContent } from './components/MainContent';
 import { Footer } from './components/Footer';
 import { ErrorFallback } from './components/ErrorFallback';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { MicrosoftLoginButton } from './components/MicrosoftLoginButton';
+import { PublicClientApplication } from '@azure/msal-browser';
+import { MsalProvider } from '@azure/msal-react';
+import { msalConfig } from './lib/auth-config';
+import { GraphService } from './services/graph.service';
+import { LicenseError } from './types/errors';
+import { groupBy, mapValues, sortBy } from 'lodash';
+
+const msalInstance = new PublicClientApplication(msalConfig);
+const graphService = new GraphService(msalInstance);
 
 const LicenseMapping = () => {
   // Data management hooks
@@ -24,7 +34,8 @@ const LicenseMapping = () => {
     error, 
     setError, 
     handleFileUpload,
-    handleFileDrop 
+    handleFileDrop,
+    setGroupedData
   } = useLicenseData();
 
   // Sorting hooks
@@ -44,6 +55,8 @@ const LicenseMapping = () => {
   const [selectedLicenseTypes, setSelectedLicenseTypes] = useState<string[]>([]);
   const [showUnknownLicenses, setShowUnknownLicenses] = useState(false);
   const [hideZeroCostAccounts, setHideZeroCostAccounts] = useState(false);
+
+  const [isLoadingMicrosoft, setIsLoadingMicrosoft] = useState(false);
 
   // Memoized computations
   const departments = useMemo(() => 
@@ -189,6 +202,56 @@ const LicenseMapping = () => {
     }).format(value);
   }, []);
 
+  const handleMicrosoftLogin = async () => {
+    try {
+      setIsLoadingMicrosoft(true);
+      const users = await graphService.getUsersWithLicenses();
+      const grouped = groupBy(users, 'department');
+      const sortedGrouped = mapValues(grouped, (departmentUsers: any[]) => 
+        sortBy(departmentUsers, ['displayName']).map((user): User => {
+          // Calculate costs first
+          let monthlyCost = 0;
+          let annualCost = 0;
+          
+          const licenses = user.licenses.map((license: { guid: string; productName: string }) => {
+            const result: License = {
+              guid: license.guid,
+              productName: license.productName
+            };
+            const pricing = SKU_PRICING[license.guid];
+            if (pricing) {
+              monthlyCost += pricing.monthlyPrice;
+              annualCost += pricing.annualPrice;
+            }
+            return result;
+          });
+
+          // Return the complete user object with optional costPerUser
+          return {
+            displayName: user.displayName || '',
+            userPrincipalName: user.userPrincipalName || '',
+            department: user.department || 'No Department',
+            originalDepartment: user.department || 'No Department',
+            licenses,
+            totalMonthlyCost: monthlyCost,
+            totalAnnualCost: annualCost,
+            ...(monthlyCost > 0 ? { costPerUser: monthlyCost } : {})
+          } as User;
+        })
+      ) as GroupedData;
+
+      setGroupedData(sortedGrouped);
+    } catch (error) {
+      setError(new LicenseError(
+        'Failed to load Microsoft data',
+        'MICROSOFT_DATA_ERROR',
+        error
+      ));
+    } finally {
+      setIsLoadingMicrosoft(false);
+    }
+  };
+
   if (error) {
     return (
       <ErrorFallback 
@@ -198,7 +261,7 @@ const LicenseMapping = () => {
     );
   }
 
-  if (loading) {
+  if (loading || isLoadingMicrosoft) {
     return <LoadingSpinner />;
   }
 
@@ -222,7 +285,16 @@ const LicenseMapping = () => {
             onLicenseTypesChange={setSelectedLicenseTypes}
             onShowUnknownLicensesChange={setShowUnknownLicenses}
             onHideZeroCostAccountsChange={setHideZeroCostAccounts}
-          />
+          >
+            <MicrosoftLoginButton
+              onLoginSuccess={handleMicrosoftLogin}
+              onLoginError={(error) => setError(new LicenseError(
+                error.message,
+                'MICROSOFT_LOGIN_ERROR',
+                error
+              ))}
+            />
+          </Header>
 
           <MainContent 
             fileName={fileName}
@@ -246,4 +318,10 @@ const LicenseMapping = () => {
   );
 };
 
-export default LicenseMapping;
+export default function App() {
+  return (
+    <MsalProvider instance={msalInstance}>
+      <LicenseMapping />
+    </MsalProvider>
+  );
+}

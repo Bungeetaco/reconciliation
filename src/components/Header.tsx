@@ -4,6 +4,7 @@ import { ActionButtons } from "./ui/ActionButtons";
 import { FileUpload } from "./FileUpload";
 import { SearchBar } from "./SearchBar";
 import { config } from '../config';
+import { ReactNode } from 'react';
 
 interface HeaderProps {
   fileName: string;
@@ -21,6 +22,7 @@ interface HeaderProps {
   onLicenseTypesChange: (types: string[]) => void;
   onShowUnknownLicensesChange: (show: boolean) => void;
   onHideZeroCostAccountsChange: (hide: boolean) => void;
+  children?: ReactNode;
 }
 
 export function Header({
@@ -38,7 +40,8 @@ export function Header({
   onDepartmentChange,
   onLicenseTypesChange,
   onShowUnknownLicensesChange,
-  onHideZeroCostAccountsChange
+  onHideZeroCostAccountsChange,
+  children
 }: HeaderProps) {
   return (
     <div className="flex-none bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
@@ -56,6 +59,7 @@ export function Header({
           <div className="flex flex-wrap items-center gap-2">
             <FileUpload onFileUpload={onFileUpload} fileName={fileName} />
             <ActionButtons fileName={fileName} onExport={onExport} />
+            {children}
             <ThemeToggle />
           </div>
         </div>

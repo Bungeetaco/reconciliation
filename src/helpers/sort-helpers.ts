@@ -2,7 +2,7 @@ import { User } from '../types';
 import { SortState } from '../types/sorting';
 
 // Helper function to safely compare values of different types
-export const compareValues = (a: any, b: any): number => {
+export const compareValues = <T>(a: T, b: T): number => {
   // Handle null/undefined values
   if (a == null && b == null) return 0;
   if (a == null) return -1;
